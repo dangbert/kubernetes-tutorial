@@ -3,7 +3,7 @@
 **Scope:**
 We'll be learning the basics of Kubernetes by locally hosting a toy Go server.
 
-[./backend/server.go](./backend/server.go) implements a single API endpoint. To start, go ahead and run it locally like so:
+[./backend/server.go](./backend/server.go) implements a few API endpoints. To start, go ahead and run it locally like so:
 
 ````bash
 cd backend/
@@ -19,7 +19,7 @@ Or visit http://localhost:8000/fruit in your browser.
 ## Part 1: Kubernetes Basics
 
 
-1. Setup [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+### 1. Setup [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 
 Minikube provides a pre-configured host ready to run kubernetes.
 
@@ -35,7 +35,7 @@ kubectl config get-contexts
 # *         minikube   minikube   minikube   default
 ````
 
-2. Build Docker image
+### 2. Build Docker image
 
 ````bash
 docker build ./backend -t backend:latest
@@ -47,7 +47,7 @@ minikube image load backend:latest
 docker run -p 8000:8000 -t backend
 ````
 
-3. Launching your first pod
+### 3. Launching your first pod
 
 Our goal is to run server.go inside a `pod`, which is a thin abstraction around a container in Kubernetes.
 
@@ -100,13 +100,15 @@ minikube ssh curl http://10.XX.XX.XX9:8000/fruit
 minikube ssh curl http://10.244.0.9:8000/fruit
 ````
 
-4. Launching your first service
+Note if you're having any trouble, you can see the solution for this step [here](https://github.com/dangbert/k8s-tutorial/blob/solution/backend5.yaml).
+
+### 4. Launching your first service
 
 So you've managed to run the application inside Kubernetes! But what if we wanted to have a DNS record making it easier to communicate with your pod?
 
-For this we'll define a new Kubernetes resource called a `service`. A service groups one or more pods under a single static IP address (with a DNS name), which is also helpful for load balancing traffic. [docs here if you're inter
+For this we'll define a new Kubernetes resource called a `service`. A service groups one or more pods under a single static IP address (with a DNS name), which is also helpful for load balancing traffic.
 
-You can optionally [see the docs here](https://kubernetes.io/docs/concepts/services-networking/service/) for more info.
+* You can optionally [see the docs here](https://kubernetes.io/docs/concepts/services-networking/service/) for more info.
 
 
 Now update backend.yaml, appending to the bottom:
@@ -159,7 +161,9 @@ curl http://backend-service/fruit
 # then use <ctrl>d to kill the pod
 ````
 
-5. Launching your first deployment
+Note if you're having any trouble, you can see the solution for this step [here](https://github.com/dangbert/k8s-tutorial/blob/solution/backend4.yaml).
+
+### 5. Launching your first deployment
 
 Now what if you wanted to scale to 3 instances of the backend pod? For this we'll use the `deployment` resource. A deployment handles spawning pods (from a template), ensuring the desired "replica" count (e.g. 3) is always met.
 * See the [deployment docs](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) for more info.
@@ -236,6 +240,7 @@ kubectl run debug --image=nicolaka/netshoot -it --rm --restart=Never -- curl htt
 
 Observe the logs as you hit the backend, and try hitting it a few times. You'll notice that a different pod may respond to the request each time.
 
+Note if you're having any trouble, you can see the solution for this step [here](https://github.com/dangbert/k8s-tutorial/blob/solution/backend5.yaml).
 
 ## Part 2: Helm Basics
 
