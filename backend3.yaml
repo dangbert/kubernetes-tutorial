@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: backend
+
+  labels:
+    app: backend # we'll use this later
+
+spec:
+  containers:
+    - name: backend
+      image: backend:latest
+      imagePullPolicy: Never # this is a local image
+      ports:
+      # indicate this pod shall expose port 8000
+      - containerPort: 8000

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+
+metadata:
+  name: backend
+
+  labels:
+    app: backend # we'll use this later
+
+spec:
+  containers:
+    - name: backend
+      image: backend:latest
+      imagePullPolicy: Never # this is a local image
+      ports:
+      # indicate this pod shall expose port 8000
+      - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: backend-service
+  labels:
+    app: backend # we'll use this later
+
+spec:
+  selector:
+    # find all pods with the label app=backend, and group under this service
+    app: backend
+    ports:
+
+  ports:
+    - protocol: TCP
+      port: 80 # port for the service itself to expose on its IP
+      targetPort: 8000 # must match the pod's `containerPort`
