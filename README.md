@@ -83,9 +83,66 @@ kubetl get pods # repeat until status show "Running"
 kubectl logs -f pods/backend
 ````
 
-The pod is currently only accessible inside minikube so forward the port locally to access.
+The pod is currently only accessible inside the minikube host...
 
 ````bash
-# expose on localhost:8000
+# so we can port forward to expose on localhost:8000
 kubectl port-forward pods/backend 8000:8000
+
+# OR alternatively get the IP of your pod (within minikube)
+kubectl get pods/backend -o wide
+
+# and curl the IP directly
+minikube ssh curl http://10.XX.XX.XX9:8000/fruit
+
+# for example
+minikube ssh curl http://10.244.0.9:8000/fruit
 ````
+
+4. Launching your first service
+
+So you've managed to run the application inside Kubernetes! But what if we wanted to have a DNS record making it easier to communicate with your pod?
+
+For this we'll define a new Kubernetes resource called a `service`. A service groups one or more pods under a single static IP address (with a DNS name), which is also helpful for load balancing traffic. [docs here if you're inter
+
+You can optionally [see the docs here](https://kubernetes.io/docs/concepts/services-networking/service/) for more info.
+
+
+Now update backend.yaml, appending to the bottom:
+
+````yaml
+# (yaml from step 3 remains here)
+
+---
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: backend-service
+  labels:
+    app: backend # we'll use this later
+
+spec:
+  selector:
+    # find all pods with the label app=backend, and group under this service
+    app: backend
+    ports:
+
+  ports:
+    - protocol: TCP
+      port: 80 # port for the service itself to expose on its IP
+      targetPort: 8000 # must match the pod's `containerPort`
+````
+
+
+````bash
+# and apply the changes
+kubectl apply -f backend.yaml
+
+# now check what IPs have been added to the service
+# (the IP listed should match your pod from earlier)
+kubectl get endpoings backend-service
+#NAME              ENDPOINTS         AGE
+#backend-service   10.244.0.9:8000   12m
+````
+
