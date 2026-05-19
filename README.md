@@ -324,4 +324,64 @@ You've successfully refactored your Kubernetes manifests into a Helm chart!
 
 Now we'll do a small refactor to try to take advantage of Helm templating. In this case we'll make the port exposed by the backend configurable via a boolean in [./demo/values.yaml](./demo/values.yaml) file.
 
+* Open the default [./demo/values.yaml](./demo/values.yaml) file and replace it's entire contents with:
 
+````yaml
+backend:
+  port: 4242
+````
+
+Now this value is available to dynamically inject into your backend.yaml. Edit [./demo/templates/backend.yaml](./demo/templates/backend.yaml):
+
+* modyfing the `deployment` resource like so:
+           ports:
+           # indicate this pod shall expose port 8000
+-          - containerPort: 8000
++          - containerPort: {{ .Values.backend.port }}
++
++          env:
++          - name: PORT
++            value: {{ .Values.backend.port | quote }}
+````
+
+* and modify the `service` like so:
+
+````txt
+     - protocol: TCP
+       port: 80 # port for the service itself to expose on its IP
+-      targetPort: 8000 # must match the pod's `containerPort`
++      targetPort: {{ .Values.backend.port }}
+````
+
+Now assuming you've [installed the Helm diff plugin](https://github.com/databus23/helm-diff#using-helm-plugin-manager--23x), we can preview this change:
+````bash
+helm diff upgrade demo ./demo
+`````
+
+Now let's apply the change in Kubernetes:
+````bash
+helm upgrade demo ./demo/
+
+# wait 30 sec and let's verify the backend is using the new port
+kubectl logs -l app=backend --prefix=true -f
+
+# kuberentes should restart your pods, which will now print:
+#[pod/backend-54755577b7-nm5zg/backend] running on port 4242
+#[pod/backend-54755577b7-k2q5j/backend] running on port 4242
+#[pod/backend-54755577b7-zsxxg/backend] running on port 4242
+````
+
+#### 4. What's Next?
+
+Feel free to review the Kubernetes docs I linked to through this tutorial, and check the [Helm docs](https://helm.sh/docs/chart_template_guide/) for more info on the templating tricks available in Helm.
+
+For example, you could try:
+* making the replicaCount for the backend deployment modifiable via values.yaml
+
+* conditionally creating a resource e.g. with:
+
+````yaml
+{- if eq .Values.envName "test" }}
+# yaml defining your resource here...
+{{- end }}
+````
