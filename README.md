@@ -254,4 +254,74 @@ In this section we'll learn the basics of Helm by refactoring our work above int
 * [Explore the Helm docs](https://helm.sh/docs/intro/using_helm) for more information.
 
 
-1. TODO
+### 1. Create Helm Chart
+
+````bash
+helm create demo
+````
+
+Now you'll have the demo folder:
+````txt
+demo/
+├── Chart.yaml
+├── charts
+├── templates
+│   ├── NOTES.txt
+│   ├── _helpers.tpl
+│   ├── deployment.yaml
+│   ├── hpa.yaml
+│   ├── httproute.yaml
+│   ├── ingress.yaml
+│   ├── service.yaml
+│   ├── serviceaccount.yaml
+│   └── tests
+│       └── test-connection.yaml
+````
+
+But let's refactor:
+````bash
+rm -rf demo/templates/*
+
+# and move our backend.yaml into templates
+mv backend.yaml demo/templates/
+````
+
+Now you're folder structure will look like this
+````txt
+$ tree demo/
+demo/
+├── Chart.yaml
+├── charts
+├── templates
+│   └── backend.yaml
+└── values.yaml
+````
+
+### 2. Install Helm Chart
+
+Now let's install our Helm "chart" inside Kubernetes.
+
+````bash
+# start by deleting your existing resources
+kubectl delete deployment/backend service/backend-service
+
+# and verifying they're gone
+kubectl get all
+# you should only see:
+#NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+#service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP   8m59s
+
+# and let's install your helm chart
+helm install demo ./demo/
+
+# and verify your deployment and service were recreated:
+kubectl get all
+````
+
+You've successfully refactored your Kubernetes manifests into a Helm chart!
+
+### 3. Try Helm Templating
+
+Now we'll do a small refactor to try to take advantage of Helm templating. In this case we'll make the port exposed by the backend configurable via a boolean in [./demo/values.yaml](./demo/values.yaml) file.
+
+
