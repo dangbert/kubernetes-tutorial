@@ -3,7 +3,13 @@
 **Scope:**
 We'll be learning the basics of Kubernetes by locally hosting a toy Go server.
 
-[./backend/server.go](./backend/server.go) implements a few API endpoints. To start, go ahead and run it locally like so:
+Start by cloning this repo
+
+````bash
+git clone https://github.com/dangbert/k8s-tutorial.git && cd k8s-tutorial
+````
+
+Noticed that [./backend/server.go](./backend/server.go) implements a few API endpoints. To start, go ahead and run it locally like so:
 
 ````bash
 cd backend/
@@ -370,6 +376,9 @@ kubectl logs -l app=backend --prefix=true -f
 #[pod/backend-54755577b7-k2q5j/backend] running on port 4242
 #[pod/backend-54755577b7-zsxxg/backend] running on port 4242
 ````
+
+NOTE: If you trouble with this section at all, you can see the solution at:
+* https://github.com/dangbert/k8s-tutorial/tree/solution/demo
 
 #### 4. What's Next?
 
